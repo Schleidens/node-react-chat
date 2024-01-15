@@ -1,3 +1,5 @@
+const { sql } = require('../db/db');
+
 const jwt = require('jsonwebtoken');
 const WebSocket = require('ws');
 
@@ -18,9 +20,12 @@ controller.login = async (req, res) => {
   res.json({ token });
 };
 
-controller.item = async (req, res) => {
+controller.rooms = async (req, res) => {
+  const rooms = await sql`
+    select * from rooms where user1 = ${req.query.username} or user2 = ${req.query.username}
+  `;
   res.json({
-    item: ['one', 'two', 'tree', 'four'],
+    rooms,
   });
 };
 

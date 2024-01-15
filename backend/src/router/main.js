@@ -5,7 +5,7 @@ const isAuthenticated = require('../middleware/main');
 const controller = require('../controller/main');
 
 router.post('/login', controller.login);
-router.get('/item', isAuthenticated, controller.item);
+router.get('/rooms', isAuthenticated, controller.rooms);
 router.post('/chat', isAuthenticated, controller.chat);
 
 module.exports = router;
