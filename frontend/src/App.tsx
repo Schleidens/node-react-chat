@@ -9,9 +9,15 @@ interface Message {
 const App = () => {
   const [message, setMessage] = useState<string>('');
   const [chatLog, setChatLog] = useState<string[]>([]);
+  const [rooms, setRooms] = useState<[]>([]);
 
-  const [username, setUsername] = useState<string>('');
+  const [username, setUsername] = useState<string>(
+    localStorage.getItem('username') ?? ''
+  );
 
+  const [token, setToken] = useState<string | null>(
+    window.localStorage.getItem('token')
+  );
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   const handleLogin = async (): Promise<void> => {
@@ -24,9 +30,11 @@ const App = () => {
         body: JSON.stringify({ username }),
       })
         .then((response) => response.json())
-        .then((data) => localStorage.setItem('token', data.token));
-
-      window.location.reload();
+        .then((data) => {
+          localStorage.setItem('token', data.token),
+            setToken(data.token),
+            localStorage.setItem('username', username);
+        });
     } catch (error) {
       console.log(error);
     }
@@ -34,8 +42,8 @@ const App = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-
-    window.location.reload();
+    localStorage.removeItem('username');
+    setToken(null);
   };
 
   useEffect(() => {
@@ -57,12 +65,35 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-
     if (token !== '' && token !== null) {
       setIsAuthenticated(true);
     }
-  }, []);
+  }, [token]);
+
+  useEffect(() => {
+    const getRooms = async () => {
+      const username = localStorage.getItem('username');
+      const result = await fetch(
+        `http://localhost:3000/rooms?username=${username}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'content-type': 'application/json',
+          },
+        }
+      );
+
+      const data = await result.json();
+      console.log(data);
+
+      setRooms(data.rooms);
+    };
+
+    if (isAuthenticated) {
+      getRooms();
+    }
+  }, [isAuthenticated, token, username]);
 
   const handleSendMessage = (): void => {
     if (message.trim() !== '') {
@@ -97,21 +128,33 @@ const App = () => {
         </div>
       )}
       {isAuthenticated && (
-        <div className='chat'>
-          <ul>
-            {chatLog.map((msg, index) => (
-              <li key={index}>{msg}</li>
-            ))}
-          </ul>
+        <>
+          <div className='chat'>
+            <ul>
+              {chatLog.map((msg, index) => (
+                <li key={index}>{msg}</li>
+              ))}
+            </ul>
 
-          <input
-            type='text'
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder='Type your message...'
-          />
-          <button onClick={handleSendMessage}>Send</button>
-        </div>
+            <input
+              type='text'
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder='Type your message...'
+            />
+            <button onClick={handleSendMessage}>Send</button>
+          </div>
+          <div>
+            <h2>Your chats</h2>
+            <ul>
+              {rooms?.map((room: { user1: string; user2: string }, index) => (
+                <li key={index}>
+                  {room.user1 === username ? room.user2 : room.user1}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
       )}
 
       {isAuthenticated && (
