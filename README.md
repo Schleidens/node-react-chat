@@ -1,1 +1,3 @@
-Chat app with nodejs, express, react and websocket
+# Real time ChatApp w
+
+nodejs, express, react and websocket
