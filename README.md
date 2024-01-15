@@ -1,3 +1,3 @@
-# Real time ChatApp w
+# Real time ChatApp
 
 nodejs, express, react and websocket
