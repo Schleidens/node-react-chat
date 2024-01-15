@@ -15,10 +15,12 @@ class WebSocketInstance {
   }
 
   sendMessage(message: string): void {
+    const token = localStorage.getItem('token');
+
     fetch('http://localhost:3000/chat', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNwaWRlciIsImlhdCI6MTcwNTAwNDQyNCwiZXhwIjoxNzA1MTcwMDI0fQ.wux8pf1-Ot3pStzerEUZqnt4vA6xeeIGQYCGONHnKM4`,
+        Authorization: `Bearer ${token}`,
         'content-type': 'application/json',
       },
       body: message,
