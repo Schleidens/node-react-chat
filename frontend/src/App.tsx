@@ -6,6 +6,14 @@ interface Message {
   message: string;
 }
 
+// interface ChatMessage {
+//   id: number;
+//   message_text: string;
+//   sender_id: number;
+//   discussion_id: number;
+//   created_at: string;
+// }
+
 const App = () => {
   const [message, setMessage] = useState<string>('');
   const [chatLog, setChatLog] = useState<string[]>([]);
@@ -33,7 +41,7 @@ const App = () => {
         .then((data) => {
           localStorage.setItem('token', data.token),
             setToken(data.token),
-            localStorage.setItem('username', username);
+            localStorage.setItem('username', data.username.username);
         });
     } catch (error) {
       console.log(error);
@@ -44,13 +52,13 @@ const App = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     setToken(null);
+    setIsAuthenticated(false);
   };
 
   useEffect(() => {
     // Event listener for incoming messages from the WebSocket server
     const handleIncomingMessage = (event: MessageEvent) => {
-      const newMessage: string = event.data;
-      console.log(event.data);
+      const newMessage: string = event.data[0];
 
       setChatLog((prevLog) => [...prevLog, newMessage]);
     };
@@ -67,6 +75,8 @@ const App = () => {
   useEffect(() => {
     if (token !== '' && token !== null) {
       setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
     }
   }, [token]);
 
@@ -96,11 +106,13 @@ const App = () => {
   }, [isAuthenticated, token, username]);
 
   const handleSendMessage = (): void => {
+    console.log(chatLog);
+
     if (message.trim() !== '') {
       const newMessage: Message = { message };
 
-      // Send the message to the WebSocket server
-      wsSocket.sendMessage(JSON.stringify(newMessage));
+      //make second arg dynamic *
+      wsSocket.sendMessage(JSON.stringify(newMessage), 3);
 
       // Update the local chat log
       // setChatLog((prevLog) => [...prevLog, newMessage]);

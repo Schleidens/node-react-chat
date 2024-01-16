@@ -14,10 +14,10 @@ class WebSocketInstance {
     };
   }
 
-  sendMessage(message: string): void {
+  sendMessage(message: string, discussion_id: number): void {
     const token = localStorage.getItem('token');
 
-    fetch('http://localhost:3000/chat', {
+    fetch(`http://localhost:3000/chat?discussion_id=${discussion_id}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -32,7 +32,6 @@ class WebSocketInstance {
 
   addMessageListener(listener: (event: MessageEvent) => void): void {
     this.messageListeners.push(listener);
-    console.log(MessageEvent);
   }
 
   removeMessageListener(listener: (event: MessageEvent) => void): void {
