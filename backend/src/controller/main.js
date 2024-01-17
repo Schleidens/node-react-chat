@@ -84,6 +84,28 @@ controller.discussion = async (req, res) => {
   }
 };
 
+controller.messages = async (req, res) => {
+  const { user } = req.user;
+  const isUserOwnDiscussion = await sql`
+    select * from rooms where (user1 = ${user.username} or user2 = ${user.username}) and id = ${req.query.discussion_id} 
+  `;
+
+  if (isUserOwnDiscussion.length === 0) {
+    res.status(400).json({ error: "You don't have access to the discussion" });
+  } else {
+    const messages = await sql`
+    select * from messages where discussion_id = ${req.query.discussion_id} order by created_at desc`;
+
+    const participant = await sql`
+      select * from users where username = ${isUserOwnDiscussion[0].user1} or username = ${isUserOwnDiscussion[0].user2} 
+    `;
+
+    console.log(participant);
+
+    res.json({ messages, participant });
+  }
+};
+
 controller.chat = async (req, res) => {
   const { message } = req.body;
 
@@ -117,7 +139,7 @@ controller.chat = async (req, res) => {
     wss.clients.forEach((client) => {
       console.log(client);
       if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({ newMessage }));
+        client.send(JSON.stringify(newMessage));
       }
     });
 

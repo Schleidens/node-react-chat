@@ -8,6 +8,7 @@ router.post('/login', controller.login);
 router.get('/users', isAuthenticated, controller.users);
 router.get('/rooms', isAuthenticated, controller.rooms);
 router.get('/inbox/:receiver/:sender', isAuthenticated, controller.discussion);
+router.get('/messages', isAuthenticated, controller.messages);
 router.post('/chat', isAuthenticated, controller.chat);
 
 module.exports = router;
