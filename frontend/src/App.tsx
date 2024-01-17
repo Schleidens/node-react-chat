@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 import wsSocket from '../ws/ws';
 
+import UserList from './components/UserList';
 interface Message {
   message: string;
 }
@@ -58,9 +59,13 @@ const App = () => {
   useEffect(() => {
     // Event listener for incoming messages from the WebSocket server
     const handleIncomingMessage = (event: MessageEvent) => {
-      const newMessage: string = event.data[0];
+      const newMessage: string = event.data;
 
-      setChatLog((prevLog) => [...prevLog, newMessage]);
+      const parsedMessage = JSON.parse(newMessage);
+
+      console.log(parsedMessage);
+
+      setChatLog((prevLog) => [...prevLog, parsedMessage[0].message_text]);
     };
 
     // Set up the WebSocket event listener
@@ -166,6 +171,8 @@ const App = () => {
               ))}
             </ul>
           </div>
+
+          <UserList />
         </>
       )}
 
